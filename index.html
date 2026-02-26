@@ -1,80 +1,107 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Breaking LetsGo 🔥</title>
 
-let audioContext;
-let musicSource;
-let musicGain;
-let timer = null;
-let isRunning = false;
-let intervalTime = 8000;
-
-const steps = [
-  "1-step.mp3",
-  "2-step.mp3",
-  "3-step.mp3",
-  "4-step.mp3",
-  "5-step.mp3",
-  "6-step.mp3",
-  "7-step.mp3",
-  "8-step.mp3",
-  "9-step.mp3",
-  "cc.mp3",
-  "hook.mp3",
-  "toprock.mp3",
-  "power.mp3",
-  "freeze.mp3"
-];
-
-async function initAudio() {
-
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-    const music = document.getElementById("music");
-    musicSource = audioContext.createMediaElementSource(music);
-
-    musicGain = audioContext.createGain();
-    musicGain.gain.value = 0.25;
-    musicSource.connect(musicGain).connect(audioContext.destination);
-  }
-
-  await audioContext.resume();
+<style>
+body {
+  background: black;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  margin-top: 100px;
 }
 
-async function playStep(file) {
+h1 {
+  font-size: 40px;
+}
 
-  const response = await fetch(file);
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = await audioContext.decodeAudioData(arrayBuffer);
+button {
+  padding: 20px;
+  font-size: 22px;
+  margin: 20px;
+  border-radius: 15px;
+  border: none;
+  width: 200px;
+}
 
-  const source = audioContext.createBufferSource();
-  source.buffer = buffer;
+.start { background: green; color: white; }
+.stop { background: red; color: white; }
+</style>
+</head>
 
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = 1.5; 
+<body>
 
-  source.connect(gainNode).connect(audioContext.destination);
+<h1>Breaking LetsGo 🔥</h1>
 
+<button class="start" onclick="startTraining()">Start</button>
+<button class="stop" onclick="stopTraining()">Stop</button>
 
-  musicGain.gain.value = 0.05;
+<audio id="music" src="music.mp3" loop></audio>
 
-  source.start(0);
+<script>
 
-  source.onended = () => {
-    musicGain.gain.value = 0.25;
+let timer = null;
+let isRunning = false;
+let intervalTime = 8000; // 8 giây giữa các lệnh
+
+const steps = [
+  "1 Step","2 Step","3 Step","4 Step","5 Step",
+  "6 Step","7 Step","8 Step","9 Step",
+  "C C","Hook","Toprock","Power","Freeze"
+];
+
+const sounds = {
+  "1 Step": new Audio("1-step.mp3"),
+  "2 Step": new Audio("2-step.mp3"),
+  "3 Step": new Audio("3-step.mp3"),
+  "4 Step": new Audio("4-step.mp3"),
+  "5 Step": new Audio("5-step.mp3"),
+  "6 Step": new Audio("6-step.mp3"),
+  "7 Step": new Audio("7-step.mp3"),
+  "8 Step": new Audio("8-step.mp3"),
+  "9 Step": new Audio("9-step.mp3"),
+  "C C": new Audio("cc.mp3"),
+  "Hook": new Audio("hook.mp3"),
+  "Toprock": new Audio("toprock.mp3"),
+  "Power": new Audio("power.mp3"),
+  "Freeze": new Audio("freeze.mp3")
+};
+
+function playStep(step) {
+
+  const music = document.getElementById("music");
+  const sound = sounds[step];
+  if (!sound) return;
+
+  sound.pause();
+  sound.currentTime = 0;
+  sound.volume = 1.0;
+
+  // giảm nhạc gần như tắt
+  music.volume = 0.03;
+
+  sound.play();
+
+  // sau khi lệnh kết thúc tăng nhạc lại
+  sound.onended = function() {
+    music.volume = 0.5;
   };
 }
 
-async function startTraining() {
+function startTraining() {
 
   if (isRunning) return;
   isRunning = true;
 
-  await initAudio();
-
   const music = document.getElementById("music");
+  music.volume = 0.3;
   music.play();
 
-  timer = setInterval(() => {
+  timer = setInterval(function() {
+
+    if (!isRunning) return;
 
     const random = steps[Math.floor(Math.random() * steps.length)];
     playStep(random);
@@ -93,6 +120,11 @@ function stopTraining() {
 
   const music = document.getElementById("music");
   music.pause();
+  music.currentTime = 0;
+  music.volume = 0.5;
 }
 
 </script>
+
+</body>
+</html>
